@@ -42,7 +42,12 @@ def create_udp_socket(ip_address: str, port: int) -> socket.socket:
 
     """
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    # macOS i Linux potrzebują SO_REUSEADDR dla wielu procesów
+    if platform.system() in ["Linux", "Darwin"]: # Darwin to macOS
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # Na macOS warto dodać też SO_REUSEPORT
+        if platform.system() == "Darwin":
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     sock.bind((ip_address, port))
     return sock
 
@@ -79,7 +84,11 @@ def create_rcv_multicast_socket(ip_address: str, port: int, interface_address: s
         if interface_address is None:
             raise ValueError("The interface address must be specified for non-Windows systems.")
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if platform.system() in ["Linux", "Darwin"]: # Darwin to macOS
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            # Na macOS warto dodać też SO_REUSEPORT
+            if platform.system() == "Darwin":
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         sock.bind((ip_address, port))
         # Specify the interface for multicast group membership instead of INADDR_ANY
         mreq = struct.pack("4s4s", socket.inet_aton(ip_address), socket.inet_aton(interface_address))

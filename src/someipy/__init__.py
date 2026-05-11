@@ -1,5 +1,5 @@
 from ._internal.someip_sd_header import TransportLayerProtocol  # noqa: F401
-from .service import Service, ServiceBuilder, EventGroup  # noqa: F401
+from .service import Service, ServiceBuilder, EventGroup, Method  # noqa: F401
 from .server_service_instance import (
     ServerServiceInstance,
     construct_server_service_instance,
